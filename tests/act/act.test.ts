@@ -143,6 +143,23 @@ describe("formatSalesThreadForMCP", () => {
     expect(result.text).not.toContain("\u2014");
     expect(result.text).toContain(" - ");
   });
+
+  it("includes thread_ts when provided", () => {
+    const result = formatSalesThreadForMCP({
+      channel: "sales-threads",
+      text: "Pricing sent",
+      thread_ts: "1741500000.000000",
+    });
+    expect(result.thread_ts).toBe("1741500000.000000");
+  });
+
+  it("omits thread_ts when not provided", () => {
+    const result = formatSalesThreadForMCP({
+      channel: "sales-threads",
+      text: "New account thread",
+    });
+    expect(result.thread_ts).toBeUndefined();
+  });
 });
 
 describe("formatCustomerSummaryForReview", () => {

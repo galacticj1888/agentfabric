@@ -111,8 +111,25 @@ mcp__claude_ai_RL_GMail__create_draft
 For each commitment owned by our team, create a Linear task.
 Format title as: `[ACCOUNT] Action item description`
 
-**5c. Sales Thread Update**
-Post the internal update to the sales threads channel:
+**5c. Sales Thread Update (reply to existing weekly thread)**
+
+First, find this week's thread for the account in #sales-threads:
+```
+mcp__claude_ai_RL_Slack__search
+  query: "[ACCOUNT NAME] in:#sales-threads after:[last Sunday's date YYYY-MM-DD]"
+```
+
+Look through the results for a top-level message in #sales-threads that mentions the account name. This is the weekly thread created on Sunday.
+
+If found, grab the message `ts` (timestamp) and reply to that thread:
+```
+mcp__claude_ai_RL_Slack__send_message
+  channel: "sales-threads"
+  thread_ts: "[ts from the search result]"
+  text: [from god prompt response]
+```
+
+If NO existing thread is found (new account, or Sunday thread hasn't been created yet), post a new top-level message instead:
 ```
 mcp__claude_ai_RL_Slack__send_message
   channel: "[salesThreadsChannel from config.yaml]"

@@ -83,3 +83,6 @@ export type {
 
 // Runs
 export { logRun, readRuns, readLastRunForAccount } from "./runs/index.js";
+
+// Utils
+export { sanitizeText } from "./utils/index.js";
