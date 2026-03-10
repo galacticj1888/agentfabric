@@ -1,3 +1,5 @@
+import { sanitizeText } from "../utils/index.js";
+
 export interface CustomerSummaryInput {
   account: string;
   targetChannel: string;
@@ -24,13 +26,13 @@ export function formatCustomerSummaryForReview(input: CustomerSummaryInput): Cus
 
   return {
     text: [
-      `*Meeting summary ready for review* — ${input.account}`,
+      `*Meeting summary ready for review* - ${input.account}`,
       ``,
       `> Target channel: ${destination}`,
       ``,
       `---`,
       ``,
-      input.summary,
+      sanitizeText(input.summary),
       ``,
       `---`,
       ``,

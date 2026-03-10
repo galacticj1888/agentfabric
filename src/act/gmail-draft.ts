@@ -1,3 +1,5 @@
+import { sanitizeText } from "../utils/index.js";
+
 export interface EmailDraftInput {
   to: string[];
   subject: string;
@@ -39,7 +41,7 @@ export function formatEmailDraftForMCP(input: EmailDraftInput): EmailDraftPayloa
   return {
     to,
     cc,
-    subject: input.subject.trim(),
-    body: input.body.trim(),
+    subject: sanitizeText(input.subject.trim()),
+    body: sanitizeText(input.body.trim()),
   };
 }

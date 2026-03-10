@@ -25,6 +25,18 @@ describe("formatEmailDraftForMCP", () => {
     expect(result.cc).toEqual([]);
   });
 
+  it("sanitizes unicode in subject and body", () => {
+    const result = formatEmailDraftForMCP({
+      to: ["test@test.com"],
+      subject: "Great session today \u2014 Thursday recap",
+      body: "Jonathan \u2014 adding the connector will be a big unlock",
+    });
+    expect(result.subject).not.toContain("\u2014");
+    expect(result.subject).toContain(" - ");
+    expect(result.body).not.toContain("\u2014");
+    expect(result.body).toContain(" - ");
+  });
+
   it("deduplicates recipients and removes cc entries already present in to", () => {
     const result = formatEmailDraftForMCP({
       to: [" jeff@runlayer.com ", "JEFF@runlayer.com", "finra@finra.org"],
@@ -122,6 +134,15 @@ describe("formatSalesThreadForMCP", () => {
     expect(result.channel).toBe("sales-threads");
     expect(result.text).toContain("FINRA");
   });
+
+  it("sanitizes unicode in text", () => {
+    const result = formatSalesThreadForMCP({
+      channel: "sales-threads",
+      text: "FINRA \u2014 big momentum today",
+    });
+    expect(result.text).not.toContain("\u2014");
+    expect(result.text).toContain(" - ");
+  });
 });
 
 describe("formatCustomerSummaryForReview", () => {
@@ -154,5 +175,15 @@ describe("formatCustomerSummaryForReview", () => {
     });
     expect(result.text).toContain("`#ext-finra-runlayer`");
     expect(result.text).not.toContain("##ext-finra-runlayer");
+  });
+
+  it("sanitizes unicode in summary text", () => {
+    const result = formatCustomerSummaryForReview({
+      account: "FINRA",
+      targetChannel: "ext-finra-runlayer",
+      summary: "Discussed timeline \u2014 looking good",
+    });
+    expect(result.text).not.toContain("\u2014");
+    expect(result.text).toContain(" - ");
   });
 });

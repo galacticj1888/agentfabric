@@ -2,6 +2,7 @@ import { z } from "zod";
 import { GOD_PROMPT_TEMPLATE } from "./prompt-templates.js";
 import { CommitmentSchema, TakeawaySchema } from "../types/fabric.js";
 import type { Commitment, Takeaway } from "../types/fabric.js";
+import { sanitizeText } from "../utils/index.js";
 
 // --- God Prompt Builder ---
 
@@ -92,9 +93,12 @@ export function parseGodPromptResponse(
       takeaways: parsed.takeaways.map((t) =>
         TakeawaySchema.parse({ ...t, account })
       ),
-      emailDraft: parsed.emailDraft,
-      salesThreadUpdate: parsed.salesThreadUpdate,
-      customerSummary: parsed.customerSummary,
+      emailDraft: {
+        subject: sanitizeText(parsed.emailDraft.subject),
+        body: sanitizeText(parsed.emailDraft.body),
+      },
+      salesThreadUpdate: sanitizeText(parsed.salesThreadUpdate),
+      customerSummary: sanitizeText(parsed.customerSummary),
     };
   } catch {
     return null;
