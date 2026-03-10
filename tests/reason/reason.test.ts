@@ -45,6 +45,25 @@ describe("buildGodPrompt", () => {
     expect(prompt).toContain("Quick sync");
     expect(prompt).toContain("FINRA");
   });
+
+  it("includes no-unicode formatting constraint", () => {
+    const prompt = buildGodPrompt({
+      sourceText: "test",
+      account: "Test",
+    });
+    expect(prompt).toContain("Never use em dashes");
+    expect(prompt).toContain("ASCII");
+  });
+
+  it("includes momentum-driven customer summary instructions", () => {
+    const prompt = buildGodPrompt({
+      sourceText: "test",
+      account: "Test",
+    });
+    expect(prompt).toContain("forward motion");
+    expect(prompt).toContain("voice profile");
+    expect(prompt).toContain("CUSTOMER-FACING");
+  });
 });
 
 describe("parseGodPromptResponse", () => {
@@ -114,6 +133,23 @@ describe("parseGodPromptResponse", () => {
 \`\`\``;
     const result = parseGodPromptResponse(response, "FINRA", "fireflies");
     expect(result).not.toBeNull();
+  });
+
+  it("sanitizes unicode in parsed outputs", () => {
+    const response = JSON.stringify({
+      commitments: [],
+      takeaways: [],
+      emailDraft: { subject: "Recap \u2014 next steps", body: "Hey \u2014 great call" },
+      salesThreadUpdate: "Update \u2014 moving fast",
+      customerSummary: "Summary \u2014 next steps",
+    });
+    const result = parseGodPromptResponse(response, "Test", "test");
+    expect(result).not.toBeNull();
+    expect(result!.emailDraft.subject).not.toContain("\u2014");
+    expect(result!.emailDraft.subject).toContain(" - ");
+    expect(result!.emailDraft.body).toContain(" - ");
+    expect(result!.salesThreadUpdate).toContain(" - ");
+    expect(result!.customerSummary).toContain(" - ");
   });
 });
 
