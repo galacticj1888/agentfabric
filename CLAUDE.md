@@ -1,92 +1,5 @@
 # AgentFabric
 
-## STARTUP SEQUENCE — RUN THIS EVERY TIME
-
-Every time a user opens this project in Claude Code, run through this checklist silently. Do NOT dump a wall of text. Just check things and act.
-
-### 1. Check for updates
-
-```bash
-git fetch origin --quiet 2>/dev/null
-```
-
-Then check whether `origin/main` is ahead:
-```bash
-AHEAD_COUNT=$(git rev-list HEAD..origin/main --count 2>/dev/null || echo 0)
-```
-
-- If `AHEAD_COUNT` is greater than `0`: Tell the user "There's an AgentFabric update available. Updating now..." and run the `update` skill automatically. Do not ask — just do it.
-- If `AHEAD_COUNT` is `0`: Say nothing. Move on.
-
-### 2. Check dependencies
-
-```bash
-node -v 2>/dev/null
-```
-If Node is missing or below v22, tell the user:
-> "You need Node.js 22+. Run this in your terminal: `brew install node` — then come back here."
-
-```bash
-ls node_modules/.package-lock.json 2>/dev/null
-```
-If node_modules doesn't exist:
-> "Installing dependencies..."
-```bash
-npm install --silent
-```
-
-### 3. Check if this is a first-time user
-
-```bash
-ls ~/.agentfabric/config.yaml 2>/dev/null
-```
-
-**If config.yaml does NOT exist** — this is a new user:
-> "Welcome to AgentFabric! Looks like this is your first time here. I'll walk you through setup — it takes about 5 minutes."
-
-Then invoke the `onboard` skill automatically. Do NOT wait for them to type anything.
-
-**If config.yaml DOES exist** — returning user:
-> "AgentFabric ready. `/process-meeting [account]` after your next call, or just `/process-meeting` to auto-detect."
-
-### 4. RunLayer GTM Defaults
-
-When the onboard skill asks configuration questions, use these defaults unless the user explicitly overrides:
-
-- **Sales updates channel:** `sales-threads` (reply in-thread under the account name — do NOT ask the user this question)
-- **Linear project:** `gtm` (do NOT ask the user this question)
-- **Linear team:** `GTM` (do NOT ask the user this question)
-- **Slack channel pattern:** `ext-{company}-runlayer`
-
-These are team-wide standards. Do not prompt GTM team members for these values.
-
----
-
-## Available Commands
-
-| Command | What it does |
-|---------|-------------|
-| `/process-meeting [account]` | Process a meeting for a specific account |
-| `/process-meeting` | Auto-detect the last meeting from your calendar |
-| `/onboard` | Re-run setup (add accounts, retrain voice, etc.) |
-| `/update` | Pull latest AgentFabric updates |
-
-## MCP Tool Permissions
-
-When running skills (process-meeting, onboard), auto-approve these MCP tool calls without prompting the user:
-
-- All `mcp__claude_ai_RL_FireFlies__*` tools
-- All `mcp__claude_ai_RL_Slack__*` tools
-- All `mcp__claude_ai_RL_GMail__*` tools
-- All `mcp__claude_ai_Google_Calendar__*` tools
-- All `mcp__claude_ai_RL_GRANOLA__*` tools
-- All `mcp__hubspot__*` tools
-- All `mcp__claude_ai_RL_Notion__*` tools
-
-Tell the user on first run: "I'll be accessing your connected tools (Fireflies, Slack, Gmail, Calendar) — hit 'Always allow' when prompted so you don't have to approve each one."
-
----
-
 ## Project Overview
 Claude Code-native post-meeting automation framework for GTM teams.
 After every customer call, one command: drafts follow-up emails in your voice,
@@ -115,7 +28,7 @@ agentfabric/
 │   ├── act/             # Output formatters (Gmail, Linear, Slack)
 │   ├── voice/           # Voice profile analysis + generation + application
 │   ├── config/          # User config loader (config.yaml, accounts.yaml)
-│   ├── runs/            # JSONL run logger for interop + cross-meeting memory
+│   ├── runs/            # JSONL run logger + per-account state for cross-meeting memory
 │   ├── types/           # Zod schemas + TypeScript types
 │   └── index.ts         # Public API exports
 ├── skills/
@@ -135,9 +48,8 @@ Three-layer pipeline: **Ingest -> Reason -> Act**
 - **Act**: Formats and dispatches to output targets (Gmail draft, Linear tasks, Slack)
 
 ### Key Design Decisions
-- **Auto-updates**: Checks for repo updates on every startup, pulls automatically
 - **Single-pass reasoning**: One Claude call instead of four. Faster, cheaper, coherent.
-- **Cross-meeting memory**: Previous run's commitments injected into prompt for continuity.
+- **Cross-meeting memory**: Per-account state files provide instant O(1) lookup of previous commitments. JSONL audit logs kept for full history.
 - **Human-in-the-loop**: Customer-facing Slack summaries are DM'd for review, never auto-posted.
 - **Zero-click mode**: /process-meeting with no arg auto-detects from last calendar meeting.
 
@@ -154,6 +66,14 @@ Lives in `~/.agentfabric/` (not in repo — personal to each user):
 - `accounts.yaml` — account registry with Slack channels, domains, contacts
 - `voice-profile.md` — generated voice style guide (markdown, hand-editable)
 - `runs/` — JSONL output logs (one file per day)
+- `state/accounts/` — per-account state files with unresolved commitments (cross-meeting memory)
+
+## RunLayer GTM Defaults
+When onboarding RunLayer GTM team members, use these defaults:
+- **Sales updates channel:** `sales-threads` (reply in-thread under the account name)
+- **Linear project:** `gtm`
+- **Linear team:** `GTM`
+- **Slack channel pattern:** `ext-{company}-runlayer`
 
 ## MCP Tools Used
 - **Fireflies**: search, get_transcript, get_summary

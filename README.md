@@ -65,7 +65,7 @@ That's it. One command. Everything else is automatic.
   Run logged                               ~/.agentfabric/runs/2026-03-09.jsonl
 ```
 
-**From call to done in 15 seconds.** Not 30 minutes. Seconds.
+**From call to done in one command.** Not 30 minutes of busywork. One command, walk away, come back to everything handled.
 
 <br>
 
@@ -165,7 +165,7 @@ Don't even type the account name.
 > /process-meeting
 ```
 
-AgentFabric checks your calendar, finds the meeting that just ended, matches the attendee domains to your accounts, and runs the whole pipeline. You finish a call, type seven characters, and you're done.
+AgentFabric checks your calendar, finds the meeting that just ended, matches the attendee domains to your accounts, and runs the whole pipeline. You finish a call, type one command, and everything kicks off automatically.
 
 <br>
 

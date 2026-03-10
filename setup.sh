@@ -14,10 +14,10 @@ echo "  ║         AgentFabric Setup            ║"
 echo "  ╚══════════════════════════════════════╝"
 echo ""
 
-INSTALL_DIR="$HOME/Desktop/Projects/agentfabric"
+INSTALL_DIR="${AGENTFABRIC_HOME:-$HOME/Desktop/Projects/agentfabric}"
 
 # ── Step 1: Node.js ──────────────────────────────
-echo "  [1/5] Checking Node.js..."
+echo "  [1/6] Checking Node.js..."
 if ! command -v node &> /dev/null; then
     echo ""
     echo "  Node.js is not installed. Installing now..."
@@ -49,7 +49,7 @@ fi
 echo "  ✓ Node.js $(node -v)"
 
 # ── Step 2: Claude Code ──────────────────────────
-echo "  [2/5] Checking Claude Code..."
+echo "  [2/6] Checking Claude Code..."
 if ! command -v claude &> /dev/null; then
     echo "  Claude Code not found. Installing now..."
     npm install -g @anthropic-ai/claude-code
@@ -57,7 +57,7 @@ fi
 echo "  ✓ Claude Code installed"
 
 # ── Step 3: Git ──────────────────────────────────
-echo "  [3/5] Checking Git..."
+echo "  [3/6] Checking Git..."
 if ! command -v git &> /dev/null; then
     echo "  Git not found. Installing now..."
     if command -v brew &> /dev/null; then
@@ -70,19 +70,13 @@ fi
 echo "  ✓ Git installed"
 
 # ── Step 4: Clone or update repo ─────────────────
-echo "  [4/5] Getting AgentFabric..."
+echo "  [4/6] Getting AgentFabric..."
 if [ -d "$INSTALL_DIR/.git" ]; then
     echo "  Found existing install. Updating main..."
     cd "$INSTALL_DIR"
     git fetch origin --quiet
     git checkout --quiet main 2>/dev/null || git checkout --quiet -B main origin/main
-    if ! git diff --quiet || ! git diff --cached --quiet; then
-        echo ""
-        echo "  ✗ Local changes detected in $INSTALL_DIR."
-        echo "    Commit or stash your changes, then run setup again."
-        exit 1
-    fi
-    git pull --ff-only origin main --quiet
+    git reset --hard origin/main --quiet
 else
     echo "  Cloning AgentFabric..."
     mkdir -p "$(dirname "$INSTALL_DIR")"
@@ -92,10 +86,14 @@ fi
 echo "  ✓ AgentFabric ready at $INSTALL_DIR"
 
 # ── Step 5: Install dependencies ─────────────────
-echo "  [5/5] Installing dependencies..."
+echo "  [5/6] Installing dependencies..."
 cd "$INSTALL_DIR"
-npm install --silent 2>/dev/null
+npm install --silent || { echo "  ✗ npm install failed. Check your network connection."; exit 1; }
 echo "  ✓ Dependencies installed"
+
+echo "  [6/6] Building TypeScript..."
+npm run build --silent || { echo "  ✗ Build failed."; exit 1; }
+echo "  ✓ Build complete"
 
 # ── Done ─────────────────────────────────────────
 echo ""

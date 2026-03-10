@@ -83,6 +83,8 @@ export type {
 
 // Runs
 export { logRun, readRuns, readLastRunForAccount } from "./runs/index.js";
+export { readAccountState, writeAccountState, AccountStateSchema } from "./runs/index.js";
+export type { AccountState } from "./runs/index.js";
 
 // Utils
 export { sanitizeText } from "./utils/index.js";
