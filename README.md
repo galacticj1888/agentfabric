@@ -102,29 +102,21 @@ That's it. One command. Everything else is automatic.
 
 ## Quick Start
 
-**Option A: One-line install** (recommended)
+Open your terminal (Cmd+Space, type "Terminal", hit Enter) and paste this:
 
-Open your terminal and paste this:
 ```bash
 curl -fsSL https://raw.githubusercontent.com/galacticj1888/agentfabric/main/setup.sh | bash
 ```
 
-It checks your setup, clones the repo, and installs everything. Then just run:
+That's the only terminal command you'll ever need. It installs everything — Node.js, Claude Code, AgentFabric. When it's done, it tells you to run:
+
 ```bash
 cd ~/Desktop/Projects/agentfabric && claude
 ```
 
-AgentFabric will automatically walk you through the rest.
+From there, AgentFabric takes over. It detects you're new, walks you through setup step by step, and gets you running in 5 minutes. No technical knowledge required.
 
-**Option B: Manual install**
-```bash
-git clone https://github.com/galacticj1888/agentfabric.git
-cd agentfabric
-npm install
-claude
-```
-
-When Claude Code opens, it detects this is your first time and starts the guided setup automatically. No commands to memorize.
+**Updates are automatic.** Every time you open AgentFabric, it checks for the latest version and pulls it. You never have to think about it.
 
 The onboarding wizard:
 
