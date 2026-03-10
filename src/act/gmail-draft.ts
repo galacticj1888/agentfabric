@@ -14,6 +14,17 @@ export interface EmailDraftPayload {
   body: string;
 }
 
+function normalizeEmailSubject(subject: string): string {
+  return sanitizeText(subject.trim()).replace(/\s+/g, " ");
+}
+
+function normalizeEmailBody(body: string): string {
+  return sanitizeText(body.trim())
+    .replace(/\r\n/g, "\n")
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n");
+}
+
 function normalizeRecipients(recipients: string[]): string[] {
   const seen = new Set<string>();
   const normalized: string[] = [];
@@ -41,7 +52,7 @@ export function formatEmailDraftForMCP(input: EmailDraftInput): EmailDraftPayloa
   return {
     to,
     cc,
-    subject: sanitizeText(input.subject.trim()),
-    body: sanitizeText(input.body.trim()),
+    subject: normalizeEmailSubject(input.subject),
+    body: normalizeEmailBody(input.body),
   };
 }

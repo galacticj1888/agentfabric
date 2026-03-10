@@ -31,6 +31,16 @@ describe("sanitizeText", () => {
     expect(sanitizeText("normal text - no issues")).toBe("normal text - no issues");
   });
 
+  it("repairs common mojibake punctuation", () => {
+    expect(sanitizeText("Great connecting today \u00e2\u20ac\u201d next steps")).toBe("Great connecting today - next steps");
+    expect(sanitizeText("He said \u00e2\u20ac\u0153hello\u00e2\u20ac\u001d")).toBe('He said "hello"');
+    expect(sanitizeText("Wait\u00e2\u20ac\u00a6")).toBe("Wait...");
+  });
+
+  it("removes stray mojibake prefixes and zero-width characters", () => {
+    expect(sanitizeText("A\u00c2 B\u200bC")).toBe("A BC");
+  });
+
   it("handles empty string", () => {
     expect(sanitizeText("")).toBe("");
   });

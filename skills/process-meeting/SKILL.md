@@ -101,11 +101,29 @@ The prompt should include:
 - All source material (transcripts, Slack messages, calendar events, emails)
 - Previous commitments from the last run (if any)
 
+For the email draft specifically, require:
+- Professional, executive-grade plain-text formatting
+- ASCII-only punctuation
+- Short paragraphs plus clean bullets
+- No slang, no hype, no transcript-style rambling
+- Voice profile informs phrasing, but polish takes priority
+
 Claude returns a single JSON object with all outputs.
 
 ### Step 5: Execute Actions
 
 **5a. Email Follow-Up Draft**
+Before creating the draft, do a formatting pass on the subject and body:
+- If you see mojibake like `â€”`, `â€œ`, `â€™`, or stray `Â`, fix it before sending anything to Gmail.
+- Convert any unicode punctuation to plain ASCII.
+- Make the email look like polished executive correspondence:
+  greeting
+  short thank-you
+  `Key takeaways:` with bullets
+  `Next steps:` with bullets
+  brief close
+- If the model drafted a rambling transcript-style block, rewrite it into the structure above before calling Gmail.
+
 Create the draft in Gmail:
 ```
 mcp__claude_ai_RL_GMail__create_draft

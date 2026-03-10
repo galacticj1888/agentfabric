@@ -49,6 +49,19 @@ describe("formatEmailDraftForMCP", () => {
     expect(result.subject).toBe("Subject");
     expect(result.body).toBe("Body");
   });
+
+  it("repairs mojibake and normalizes plain-text email spacing", () => {
+    const result = formatEmailDraftForMCP({
+      to: ["test@test.com"],
+      subject: "Great connecting today \u00e2\u20ac\u201d next steps",
+      body: "Sydney,\r\n\r\nKey takeaways:\r\n\u2022 Role scope\u00a0\r\n\r\n\r\nNext steps:\r\n\u2022 Send terms",
+    });
+    expect(result.subject).toBe("Great connecting today - next steps");
+    expect(result.body).toContain("Key takeaways:\n- Role scope");
+    expect(result.body).not.toContain("\r");
+    expect(result.body).not.toContain("\u00a0");
+    expect(result.body).not.toContain("\n\n\n");
+  });
 });
 
 describe("formatLinearTasksForMCP", () => {

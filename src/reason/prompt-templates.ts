@@ -48,9 +48,16 @@ Extract the most important takeaways:
 - **details**: Additional context (optional)
 
 ### emailDraft
-Write a follow-up email in the voice profile above:
-- **subject**: Email subject line
-- **body**: Full email body ready to send. Thank them briefly, recap decisions, list action items with owners, propose next steps. Match the voice profile exactly.
+Write a follow-up email in the voice profile above, but elevate it to polished executive-grade customer communication:
+- **subject**: Specific, professional subject line in plain ASCII. Prefer 3-7 words. No fluff, hype, or emojis.
+- **body**: Full plain-text email ready to send. Sound like the user's best professional self, not a transcript.
+
+Email body requirements:
+- Use short paragraphs and clean plain-text bullets. Prefer bullets over numbered lists unless sequence matters.
+- Recommended structure: greeting; brief thank-you; "Key takeaways:" bullets; "Next steps:" bullets; concise close.
+- Keep the tone crisp, confident, and high-agency. No slang, no profanity, no "super excited", no rambling.
+- Do not use em dashes, curly quotes, or any unicode punctuation. ASCII only.
+- Voice profile should shape phrasing and cadence, but polish and clarity take priority over mimicking casual speech.
 
 ### salesThreadUpdate
 Write a brief internal Slack update (3-5 bullets, Slack mrkdwn). Cover: what happened, key decisions, next steps with owners, risks/blockers. Be direct - this is for the internal team only.

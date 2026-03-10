@@ -64,6 +64,17 @@ describe("buildGodPrompt", () => {
     expect(prompt).toContain("voice profile");
     expect(prompt).toContain("CUSTOMER-FACING");
   });
+
+  it("includes executive-grade email formatting rules", () => {
+    const prompt = buildGodPrompt({
+      sourceText: "test",
+      account: "Test",
+    });
+    expect(prompt).toContain("executive-grade");
+    expect(prompt).toContain("Key takeaways:");
+    expect(prompt).toContain("Next steps:");
+    expect(prompt).toContain("No slang");
+  });
 });
 
 describe("parseGodPromptResponse", () => {
