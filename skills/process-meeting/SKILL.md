@@ -3,6 +3,12 @@ name: process-meeting
 description: Process a meeting for a specific account — extract commitments, draft email, create tasks, post updates
 ---
 
+<!--
+  SKILL REGISTRATION: This skill is registered as "process-meeting" in the
+  skills/ directory. If Claude Code says "unknown skill", the skills directory
+  may not be in the project root. Verify: ls skills/process-meeting/SKILL.md
+-->
+
 # Process Meeting
 
 Run the full AgentFabric pipeline for a specific account after a meeting.
@@ -14,6 +20,7 @@ Run the full AgentFabric pipeline for a specific account after a meeting.
 - "/process-meeting" (auto-detects from last calendar meeting)
 - "Run the process for [account]"
 - "Post-meeting [account]"
+- "process meeting" (without slash — common for new users)
 
 ## Protocol
 

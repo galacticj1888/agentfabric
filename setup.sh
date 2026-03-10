@@ -75,10 +75,21 @@ if [ -d "$INSTALL_DIR/.git" ]; then
     echo "  Found existing install. Pulling latest..."
     cd "$INSTALL_DIR"
     git pull origin main --quiet 2>/dev/null || true
+    LATEST_TAG=$(git describe --tags --abbrev=0 origin/main 2>/dev/null || echo "")
+    if [ -n "$LATEST_TAG" ]; then
+        git checkout --quiet "$LATEST_TAG"
+        echo "  ✓ Updated to release $LATEST_TAG"
+    fi
 else
     echo "  Cloning AgentFabric..."
     mkdir -p "$(dirname "$INSTALL_DIR")"
     git clone --quiet https://github.com/galacticj1888/agentfabric.git "$INSTALL_DIR"
+    # Pin to latest release tag (if any)
+    LATEST_TAG=$(cd "$INSTALL_DIR" && git describe --tags --abbrev=0 origin/main 2>/dev/null || echo "")
+    if [ -n "$LATEST_TAG" ]; then
+        cd "$INSTALL_DIR" && git checkout --quiet "$LATEST_TAG"
+        echo "  ✓ Pinned to release $LATEST_TAG"
+    fi
     cd "$INSTALL_DIR"
 fi
 echo "  ✓ AgentFabric ready at $INSTALL_DIR"
@@ -101,4 +112,16 @@ echo "    cd $INSTALL_DIR && claude"
 echo ""
 echo "  AgentFabric will walk you through the"
 echo "  rest of the setup automatically."
+echo ""
+echo "  ┌──────────────────────────────────────┐"
+echo "  │         Terminal Cheat Sheet          │"
+echo "  ├──────────────────────────────────────┤"
+echo "  │  Cmd+T          New tab              │"
+echo "  │  Cmd+Delete     Clear current line   │"
+echo "  │  Cmd+K          Clear screen         │"
+echo "  │  Up arrow       Previous command     │"
+echo "  │  Tab             Auto-complete        │"
+echo "  │  cd [folder]    Go to a folder       │"
+echo "  │  ls              List files            │"
+echo "  └──────────────────────────────────────┘"
 echo ""

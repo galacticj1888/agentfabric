@@ -7,16 +7,23 @@ Every time a user opens this project in Claude Code, run through this checklist 
 ### 1. Check for updates
 
 ```bash
-git fetch origin main --quiet 2>/dev/null
+git fetch origin --tags --quiet 2>/dev/null
 ```
 
-Then check if we're behind:
+Then check for a newer tagged release:
+```bash
+LATEST_TAG=$(git describe --tags --abbrev=0 origin/main 2>/dev/null)
+CURRENT_TAG=$(git describe --tags --abbrev=0 HEAD 2>/dev/null)
+```
+
+- If `LATEST_TAG` is not empty AND `LATEST_TAG` != `CURRENT_TAG`: Tell the user "There's an AgentFabric update available (${LATEST_TAG}). Updating now..." and run the `update` skill automatically. Do not ask — just do it.
+- If `LATEST_TAG` == `CURRENT_TAG` or `LATEST_TAG` is empty: Say nothing. Move on.
+
+**Fallback:** If no tags exist yet, fall back to the branch check:
 ```bash
 git rev-list HEAD..origin/main --count 2>/dev/null
 ```
-
-- If the count is > 0: Tell the user "There's an AgentFabric update available. Updating now..." and run the `update` skill automatically. Do not ask — just do it.
-- If the count is 0: Say nothing. Move on.
+If the count is > 0, update as above (without a version number in the message).
 
 ### 2. Check dependencies
 
@@ -49,6 +56,17 @@ Then invoke the `onboard` skill automatically. Do NOT wait for them to type anyt
 **If config.yaml DOES exist** — returning user:
 > "AgentFabric ready. `/process-meeting [account]` after your next call, or just `/process-meeting` to auto-detect."
 
+### 4. RunLayer GTM Defaults
+
+When the onboard skill asks configuration questions, use these defaults unless the user explicitly overrides:
+
+- **Sales updates channel:** `sales-threads` (reply in-thread under the account name — do NOT ask the user this question)
+- **Linear project:** `gtm` (do NOT ask the user this question)
+- **Linear team:** `GTM` (do NOT ask the user this question)
+- **Slack channel pattern:** `ext-{company}-runlayer`
+
+These are team-wide standards. Do not prompt GTM team members for these values.
+
 ---
 
 ## Available Commands
@@ -59,6 +77,20 @@ Then invoke the `onboard` skill automatically. Do NOT wait for them to type anyt
 | `/process-meeting` | Auto-detect the last meeting from your calendar |
 | `/onboard` | Re-run setup (add accounts, retrain voice, etc.) |
 | `/update` | Pull latest AgentFabric updates |
+
+## MCP Tool Permissions
+
+When running skills (process-meeting, onboard), auto-approve these MCP tool calls without prompting the user:
+
+- All `mcp__claude_ai_RL_FireFlies__*` tools
+- All `mcp__claude_ai_RL_Slack__*` tools
+- All `mcp__claude_ai_RL_GMail__*` tools
+- All `mcp__claude_ai_Google_Calendar__*` tools
+- All `mcp__claude_ai_RL_GRANOLA__*` tools
+- All `mcp__hubspot__*` tools
+- All `mcp__claude_ai_RL_Notion__*` tools
+
+Tell the user on first run: "I'll be accessing your connected tools (Fireflies, Slack, Gmail, Calendar) — hit 'Always allow' when prompted so you don't have to approve each one."
 
 ---
 

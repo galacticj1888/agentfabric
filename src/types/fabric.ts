@@ -72,7 +72,8 @@ export const FabricConfigSchema = z.object({
   linearProject: z.string().optional(),
   linearTeam: z.string().optional(),
   salesThreadsChannel: z.string().default("sales-threads"),
-  defaultSources: z.array(z.string()).default(["fireflies", "slack", "calendar"]),
+  salesThreadsMode: z.enum(["reply-in-thread", "top-level"]).default("reply-in-thread"),
+  defaultSources: z.array(z.string()).default(["fireflies", "slack", "calendar", "gmail"]),
 });
 export type FabricConfig = z.infer<typeof FabricConfigSchema>;
 

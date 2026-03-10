@@ -27,6 +27,15 @@ This is likely the user's FIRST TIME using Claude Code. Do not assume they know 
 
 ## Protocol
 
+### Progress Display
+
+At the START of every step, display a progress bar:
+
+> ━━━━━━━━━━━━━━━━━━━━ Step [N] of 6: [Step Name]
+> ▓▓▓▓▓▓▓░░░░░░░░░░░░░ [N/6]
+
+This helps users who are new to terminal UIs understand where they are in the process.
+
 ### Step 1 of 6: Create Your Config Folder
 
 Say to the user:
@@ -49,7 +58,7 @@ Say to the user:
 
 Test each tool one by one. After each test, report the result immediately:
 
-**Required connections (need all 4):**
+**Required connections (need all 5):**
 
 1. Test Fireflies:
 ```
@@ -75,9 +84,17 @@ mcp__claude_ai_Google_Calendar__gcal_list_events (max_results: 1)
 ```
 Report: "Calendar: Connected" or "Calendar: Not connected"
 
+5. Test HubSpot:
+```
+mcp__hubspot__search_crm_objects
+  objectType: "deals"
+  limit: 1
+```
+Report: "HubSpot: Connected" or "HubSpot: Not connected"
+
 **Optional connections (nice to have):**
 
-5. Test Granola:
+6. Test Granola:
 ```
 mcp__claude_ai_RL_GRANOLA__list_meetings (limit: 1)
 ```
@@ -90,8 +107,16 @@ Your connections:
   Slack        ✓ Connected
   Gmail        ✓ Connected
   Calendar     ✓ Connected
+  HubSpot      ✓ Connected
   Granola      ✓ Connected (optional)
 ```
+
+**IMPORTANT:** A connection is only "Connected" if the test call above returns actual data (even if empty results). If the call throws an error, permission error, or auth error, the connection is NOT working regardless of what the MCP dashboard says.
+
+**If a connection fails with a permissions error:**
+> "[Tool name] is connected but doesn't have the right permissions. Go to your Claude Code MCP connections page, find [tool name], click the three dots → Edit, and make sure all permissions are enabled. Then come back and I'll test again."
+
+Do NOT just say "connected" based on whether the tool exists — actually verify the response.
 
 **If any REQUIRED connection fails:**
 > "Looks like [tool name] isn't connected yet. This is an MCP connection that needs to be set up in your Claude Code settings. Ask Jeff or check the RunLayer dashboard to get this connected, then run /onboard again."
@@ -124,6 +149,39 @@ mcp__claude_ai_RL_FireFlies__fireflies_get_transcript
 ```
 
 **If they want to paste:** Accept whatever they paste.
+
+**If fewer than 3 transcripts found (common for new hires):**
+
+Try these fallback sources IN ORDER until you have enough material:
+
+1. Search Fireflies for any call where the user was a PARTICIPANT (not just organizer):
+```
+mcp__claude_ai_RL_FireFlies__fireflies_search
+  query: "[their name]"
+```
+
+2. If still < 3, search their sent emails for recent threads:
+```
+mcp__claude_ai_RL_GMail__search
+  query: "from:me newer_than:30d"
+  limit: 15
+```
+
+3. If still < 3, search their Slack messages:
+```
+mcp__claude_ai_RL_Slack__search
+  query: "from:@[their name]"
+  limit: 20
+```
+
+4. If STILL not enough material from any source, generate a "starter" profile:
+> "I don't have enough of your writing yet to build a full voice profile. I'll create a starter profile based on what I've seen so far. After your first 5 calls, run `/onboard` again and I'll retrain it with more data."
+
+Write a basic starter profile with:
+- Tone: "Professional but personable (will be refined after more calls)"
+- Lexicon: [leave empty, note "Will populate after more transcripts"]
+- Email Patterns: Standard professional patterns
+- Mark it with a header: `<!-- STARTER PROFILE - retrain after 5 calls -->`
 
 Once you have the transcripts, analyze them for:
 - Tone and personality (formal? casual? direct? warm?)
@@ -162,6 +220,35 @@ mcp__hubspot__search_crm_objects
 ```
 Parse the deals, show them to the user, and ask which ones are theirs.
 
+**If HubSpot is available but user has no deals assigned:**
+Search for deals where the user's name appears in notes, recent activity, or where their manager mentioned them:
+```
+mcp__hubspot__search_crm_objects
+  objectType: "deals"
+  query: "[user's name]"
+```
+
+Also search Fireflies for accounts the user has been on calls about:
+```
+mcp__claude_ai_RL_FireFlies__fireflies_search
+  query: "[user's name]"
+```
+
+Present what you find:
+> "I found these accounts that seem relevant to you based on call history and deal notes:"
+> [list accounts]
+> "Want me to add any or all of these? You can also add more later with /onboard."
+
+**If the user just started and has nothing:**
+> "No worries — you're brand new! You can skip this step and add accounts later with /onboard. For now, I'll set up your config so you're ready to go."
+
+Write an empty accounts.yaml:
+```yaml
+accounts: []
+```
+
+Do NOT block onboarding because a new hire has no accounts yet.
+
 **If HubSpot is not available:**
 Ask them to list their accounts. For each one, ask:
 1. "What's the company name?"
@@ -182,24 +269,19 @@ accounts:
 After all accounts are added:
 > "Got it — [N] accounts configured. Step 4 of 6 complete."
 
-### Step 5 of 6: Final Settings
+### Step 5 of 6: Apply Team Defaults
 
 Say to the user:
-> "Almost done. Just two quick questions."
+> "Applying RunLayer GTM team defaults for your config..."
 
-**Question 1:**
-> "What Slack channel does your team post sales updates to? (If you're not sure, I'll default to #sales-threads)"
-
-**Question 2:**
-> "Do you use Linear for task tracking? If so, what's the project or team name? (If you don't use Linear or aren't sure, just say skip)"
-
-Write config to `~/.agentfabric/config.yaml`:
+Write config to `~/.agentfabric/config.yaml` with these HARD-CODED values — do NOT ask the user:
 ```yaml
-userId: [their name, lowercase]
+userId: [their first name, lowercase]
 voiceProfilePath: ./voice-profile.md
-salesThreadsChannel: [their answer or "sales-threads"]
-linearProject: [their answer or omit]
-linearTeam: [their answer or omit]
+salesThreadsChannel: sales-threads
+salesThreadsMode: reply-in-thread
+linearProject: gtm
+linearTeam: GTM
 defaultSources:
   - fireflies
   - slack
@@ -207,7 +289,13 @@ defaultSources:
   - gmail
 ```
 
-> "Settings saved. Step 5 of 6 complete. One more step — let's take it for a spin."
+Then show them what was set:
+> "Here's your config:"
+> - Sales updates → #sales-threads (reply under each account's thread)
+> - Task tracking → Linear GTM project
+> - Data sources → Fireflies, Slack, Calendar, Gmail
+>
+> "If any of this is wrong, just tell me and I'll change it. Otherwise, Step 5 of 6 complete."
 
 ### Step 6 of 6: Test Run
 

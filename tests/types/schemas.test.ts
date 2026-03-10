@@ -86,7 +86,8 @@ describe("FabricConfig schema", () => {
       voiceProfilePath: "~/.agentfabric/voice-profile.md",
     });
     expect(config.salesThreadsChannel).toBe("sales-threads");
-    expect(config.defaultSources).toEqual(["fireflies", "slack", "calendar"]);
+    expect(config.salesThreadsMode).toBe("reply-in-thread");
+    expect(config.defaultSources).toEqual(["fireflies", "slack", "calendar", "gmail"]);
   });
 });
 
