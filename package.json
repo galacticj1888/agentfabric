@@ -1,6 +1,6 @@
 {
   "name": "agentfabric",
-  "version": "0.1.0",
+  "version": "0.14.88",
   "description": "Claude Code-native post-meeting automation for GTM teams",
   "type": "module",
   "engines": {
