@@ -24,6 +24,19 @@ describe("formatEmailDraftForMCP", () => {
     });
     expect(result.cc).toEqual([]);
   });
+
+  it("deduplicates recipients and removes cc entries already present in to", () => {
+    const result = formatEmailDraftForMCP({
+      to: [" jeff@runlayer.com ", "JEFF@runlayer.com", "finra@finra.org"],
+      cc: ["finra@finra.org", "team@runlayer.com", "team@runlayer.com"],
+      subject: " Subject ",
+      body: " Body ",
+    });
+    expect(result.to).toEqual(["jeff@runlayer.com", "finra@finra.org"]);
+    expect(result.cc).toEqual(["team@runlayer.com"]);
+    expect(result.subject).toBe("Subject");
+    expect(result.body).toBe("Body");
+  });
 });
 
 describe("formatLinearTasksForMCP", () => {
@@ -66,6 +79,38 @@ describe("formatLinearTasksForMCP", () => {
     });
     expect(tasks).toHaveLength(1);
   });
+
+  it("excludes inferred commitments by default", () => {
+    const tasks = formatLinearTasksForMCP({
+      commitments: [
+        { who: "Jeff", toWhom: "Duane", what: "Maybe send pricing", confidence: "inferred" as const, source: "test" },
+      ],
+      account: "FINRA",
+    });
+    expect(tasks).toHaveLength(0);
+  });
+
+  it("supports explicit opt-in for inferred commitments", () => {
+    const tasks = formatLinearTasksForMCP({
+      commitments: [
+        { who: "Jeff", toWhom: "Duane", what: "Maybe send pricing", confidence: "inferred" as const, source: "test" },
+      ],
+      account: "FINRA",
+      includeInferred: true,
+    });
+    expect(tasks).toHaveLength(1);
+  });
+
+  it("matches team members on token boundaries instead of substrings", () => {
+    const tasks = formatLinearTasksForMCP({
+      commitments: [
+        { who: "Joann Smith", toWhom: "Jeff", what: "Handle procurement", confidence: "explicit" as const, source: "test" },
+      ],
+      account: "FINRA",
+      teamMembers: ["Ann"],
+    });
+    expect(tasks).toHaveLength(0);
+  });
 });
 
 describe("formatSalesThreadForMCP", () => {
@@ -99,5 +144,15 @@ describe("formatCustomerSummaryForReview", () => {
       summary: "Summary text here",
     });
     expect(result.text).toContain("ext-gs-runlayer");
+  });
+
+  it("does not duplicate the channel prefix when target already includes #", () => {
+    const result = formatCustomerSummaryForReview({
+      account: "FINRA",
+      targetChannel: "#ext-finra-runlayer",
+      summary: "Summary text here",
+    });
+    expect(result.text).toContain("`#ext-finra-runlayer`");
+    expect(result.text).not.toContain("##ext-finra-runlayer");
   });
 });

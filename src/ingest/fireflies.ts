@@ -1,8 +1,9 @@
 import type { FirefliesTranscript } from "../types/ingest.js";
+import { sortByDate } from "./sort.js";
 
 export function mergeTranscriptText(transcripts: FirefliesTranscript[]): string {
   if (transcripts.length === 0) return "";
-  return transcripts
+  return sortByDate(transcripts, (transcript) => transcript.dateString)
     .map((t) => {
       const parts: string[] = [`## ${t.title} (${t.dateString})`];
       if (t.summary?.short_summary) parts.push(`Summary: ${t.summary.short_summary}`);
