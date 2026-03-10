@@ -17,37 +17,33 @@ Pull the latest version of AgentFabric from GitHub.
 
 ## Protocol
 
-### Step 1: Pull latest code and pin to release
+### Step 1: Pull latest code from main
 
 ```bash
-cd [project directory] && git fetch origin --tags --quiet
+cd [project directory] && git fetch origin --quiet
 ```
 
-Check for the latest release tag:
+Check for uncommitted local changes:
 ```bash
-LATEST_TAG=$(git describe --tags --abbrev=0 origin/main 2>/dev/null || echo "")
+git status --short
 ```
 
-If a tag exists, check it out:
+If there are local changes, STOP and tell the user:
+> "This install has local changes, so I didn't auto-update it. Commit, stash, or discard those changes first, then run `/update` again."
+
+If the working tree is clean, make sure you're on `main` and fast-forward it:
 ```bash
-git checkout --quiet "$LATEST_TAG"
+git checkout main
+git pull --ff-only origin main
 ```
 
-If NO tags exist yet, fall back to branch pull:
+If `git checkout main` fails because the branch does not exist locally, create it from `origin/main`:
 ```bash
-git pull origin main
+git checkout -B main origin/main
 ```
 
-If this fails with merge conflicts:
-> "There's a conflict with local changes. This usually means someone edited files directly. Let me fix this."
-```bash
-git stash && git pull origin main && git stash pop
-```
-
-If that still fails:
-```bash
-git reset --hard origin/main
-```
+If `git pull --ff-only origin main` fails, STOP and tell the user:
+> "I couldn't fast-forward this install cleanly. Check the local git state, then rerun `/update` once it's back on `main`."
 
 ### Step 2: Install any new dependencies
 

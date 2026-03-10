@@ -123,6 +123,28 @@ describe("formatLinearTasksForMCP", () => {
     });
     expect(tasks).toHaveLength(0);
   });
+
+  it("sanitizes unicode in task titles and descriptions", () => {
+    const tasks = formatLinearTasksForMCP({
+      commitments: [
+        {
+          who: "Jeff",
+          toWhom: "Duane",
+          what: "Send pricing proposal — revised",
+          rawQuote: "I'll send the “final” version…",
+          confidence: "explicit" as const,
+          source: "fireflies",
+        },
+      ],
+      account: "FINRA",
+    });
+    expect(tasks).toHaveLength(1);
+    expect(tasks[0].title).toContain(" - revised");
+    expect(tasks[0].title).not.toContain("\u2014");
+    expect(tasks[0].description).toContain('"final"');
+    expect(tasks[0].description).toContain("version...");
+    expect(tasks[0].description).not.toContain("\u201c");
+  });
 });
 
 describe("formatSalesThreadForMCP", () => {

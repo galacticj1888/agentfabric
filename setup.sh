@@ -72,24 +72,21 @@ echo "  ✓ Git installed"
 # ── Step 4: Clone or update repo ─────────────────
 echo "  [4/5] Getting AgentFabric..."
 if [ -d "$INSTALL_DIR/.git" ]; then
-    echo "  Found existing install. Pulling latest..."
+    echo "  Found existing install. Updating main..."
     cd "$INSTALL_DIR"
-    git pull origin main --quiet 2>/dev/null || true
-    LATEST_TAG=$(git describe --tags --abbrev=0 origin/main 2>/dev/null || echo "")
-    if [ -n "$LATEST_TAG" ]; then
-        git checkout --quiet "$LATEST_TAG"
-        echo "  ✓ Updated to release $LATEST_TAG"
+    git fetch origin --quiet
+    git checkout --quiet main 2>/dev/null || git checkout --quiet -B main origin/main
+    if ! git diff --quiet || ! git diff --cached --quiet; then
+        echo ""
+        echo "  ✗ Local changes detected in $INSTALL_DIR."
+        echo "    Commit or stash your changes, then run setup again."
+        exit 1
     fi
+    git pull --ff-only origin main --quiet
 else
     echo "  Cloning AgentFabric..."
     mkdir -p "$(dirname "$INSTALL_DIR")"
-    git clone --quiet https://github.com/galacticj1888/agentfabric.git "$INSTALL_DIR"
-    # Pin to latest release tag (if any)
-    LATEST_TAG=$(cd "$INSTALL_DIR" && git describe --tags --abbrev=0 origin/main 2>/dev/null || echo "")
-    if [ -n "$LATEST_TAG" ]; then
-        cd "$INSTALL_DIR" && git checkout --quiet "$LATEST_TAG"
-        echo "  ✓ Pinned to release $LATEST_TAG"
-    fi
+    git clone --quiet --branch main --single-branch https://github.com/galacticj1888/agentfabric.git "$INSTALL_DIR"
     cd "$INSTALL_DIR"
 fi
 echo "  ✓ AgentFabric ready at $INSTALL_DIR"

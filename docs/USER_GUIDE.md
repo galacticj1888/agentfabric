@@ -86,7 +86,7 @@ This installs TypeScript, Zod (for data validation), and Vitest (for tests). No 
 npm test
 ```
 
-You should see all tests passing (67+). If not, make sure you're on Node 22+.
+You should see all tests passing. If not, make sure you're on Node 22+.
 
 ### 4. Open Claude Code in the project directory
 
@@ -148,9 +148,12 @@ For each account it captures:
 
 #### d. General Config
 
-It asks a couple quick questions:
-- What Linear team/project should tasks go to? (skip if you don't use Linear yet)
-- What Slack channel do you post sales updates to? (defaults to #sales-threads)
+For RunLayer GTM users, AgentFabric applies the team defaults automatically:
+- Linear project/team: `gtm` / `GTM`
+- Sales updates channel: `#sales-threads`
+- Sales update mode: reply inside each account's weekly thread
+
+If you need something different later, edit `~/.agentfabric/config.yaml`.
 
 ```
 ~/.agentfabric/config.yaml
@@ -303,7 +306,7 @@ Each line is a JSON object with the full output: commitments, takeaways, actions
 If you want to extend AgentFabric or understand the codebase:
 
 ```bash
-npm run test         # Run the test suite (67+ tests)
+npm run test         # Run the test suite
 npm run typecheck    # TypeScript strict mode check
 npm run build        # Compile to dist/
 npm run dev          # Watch mode for development

@@ -7,23 +7,16 @@ Every time a user opens this project in Claude Code, run through this checklist 
 ### 1. Check for updates
 
 ```bash
-git fetch origin --tags --quiet 2>/dev/null
+git fetch origin --quiet 2>/dev/null
 ```
 
-Then check for a newer tagged release:
+Then check whether `origin/main` is ahead:
 ```bash
-LATEST_TAG=$(git describe --tags --abbrev=0 origin/main 2>/dev/null)
-CURRENT_TAG=$(git describe --tags --abbrev=0 HEAD 2>/dev/null)
+AHEAD_COUNT=$(git rev-list HEAD..origin/main --count 2>/dev/null || echo 0)
 ```
 
-- If `LATEST_TAG` is not empty AND `LATEST_TAG` != `CURRENT_TAG`: Tell the user "There's an AgentFabric update available (${LATEST_TAG}). Updating now..." and run the `update` skill automatically. Do not ask — just do it.
-- If `LATEST_TAG` == `CURRENT_TAG` or `LATEST_TAG` is empty: Say nothing. Move on.
-
-**Fallback:** If no tags exist yet, fall back to the branch check:
-```bash
-git rev-list HEAD..origin/main --count 2>/dev/null
-```
-If the count is > 0, update as above (without a version number in the message).
+- If `AHEAD_COUNT` is greater than `0`: Tell the user "There's an AgentFabric update available. Updating now..." and run the `update` skill automatically. Do not ask — just do it.
+- If `AHEAD_COUNT` is `0`: Say nothing. Move on.
 
 ### 2. Check dependencies
 

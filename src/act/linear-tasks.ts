@@ -1,4 +1,5 @@
 import type { Commitment } from "../types/fabric.js";
+import { sanitizeText } from "../utils/index.js";
 
 export interface LinearTaskInput {
   commitments: Commitment[];
@@ -67,9 +68,8 @@ export function formatLinearTasksForMCP(input: LinearTaskInput): LinearTaskPaylo
       deduped.add(key);
       return true;
     })
-    .map((c) => ({
-      title: `[${input.account}] ${c.what}`,
-      description: [
+    .map((c) => {
+      const description = [
         `**Account:** ${input.account}`,
         `**Owner:** ${c.who}`,
         `**For:** ${c.toWhom}`,
@@ -77,8 +77,13 @@ export function formatLinearTasksForMCP(input: LinearTaskInput): LinearTaskPaylo
         c.rawQuote ? `**Quote:** "${c.rawQuote}"` : null,
         `**Confidence:** ${c.confidence}`,
         `**Source:** ${c.source}`,
-      ].filter(Boolean).join("\n"),
-      project: input.project ?? "default",
-      labels: [accountLabel, "agentfabric"],
-    }));
+      ].filter(Boolean).join("\n");
+
+      return {
+        title: sanitizeText(`[${input.account}] ${c.what}`),
+        description: sanitizeText(description),
+        project: input.project ?? "default",
+        labels: [accountLabel, "agentfabric"],
+      };
+    });
 }
