@@ -10,12 +10,14 @@ const DEFAULT_RUNS_DIR = join(
 );
 
 export function logRun(output: FabricOutput, runsDir: string = DEFAULT_RUNS_DIR): void {
+  const validatedOutput = FabricOutputSchema.parse(output);
+
   if (!existsSync(runsDir)) {
     mkdirSync(runsDir, { recursive: true });
   }
-  const date = output.timestamp.slice(0, 10);
+  const date = validatedOutput.timestamp.slice(0, 10);
   const filePath = join(runsDir, `${date}.jsonl`);
-  appendFileSync(filePath, JSON.stringify(output) + "\n");
+  appendFileSync(filePath, JSON.stringify(validatedOutput) + "\n");
 }
 
 export function readRuns(date: string, runsDir: string = DEFAULT_RUNS_DIR): FabricOutput[] {

@@ -47,6 +47,11 @@ describe("logRun + readRuns", () => {
     expect(readRuns("2026-03-09", testDir)).toHaveLength(1);
     expect(readRuns("2026-03-10", testDir)).toHaveLength(1);
   });
+
+  it("validates run shape before writing", () => {
+    expect(() => logRun({} as FabricOutput, testDir)).toThrow();
+    expect(readRuns("2026-03-09", testDir)).toEqual([]);
+  });
 });
 
 describe("readLastRunForAccount", () => {

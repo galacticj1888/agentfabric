@@ -24,6 +24,7 @@ defaultSources:
     const config = loadConfig(testDir);
     expect(config.userId).toBe("jeff");
     expect(config.defaultSources).toEqual(["fireflies", "slack", "calendar"]);
+    expect(config.voiceProfilePath).toBe(join(testDir, "voice-profile.md"));
   });
 
   it("throws on missing config.yaml", () => {
@@ -73,6 +74,20 @@ describe("resolveAccount", () => {
     expect(resolveAccount(accounts, "goldman")?.name).toBe("Goldman Sachs");
   });
 
+  it("finds account by domain, email, or slack channel", () => {
+    const richerAccounts = [
+      {
+        name: "FINRA",
+        slackChannel: "ext-finra-runlayer",
+        domain: "finra.org",
+        contacts: ["duane.whitt@finra.org"],
+      },
+    ];
+    expect(resolveAccount(richerAccounts, "finra.org")?.name).toBe("FINRA");
+    expect(resolveAccount(richerAccounts, "duane.whitt@finra.org")?.name).toBe("FINRA");
+    expect(resolveAccount(richerAccounts, "#ext-finra-runlayer")?.name).toBe("FINRA");
+  });
+
   it("returns undefined for no match", () => {
     expect(resolveAccount([], "FINRA")).toBeUndefined();
   });
@@ -87,6 +102,12 @@ describe("loadVoiceProfile", () => {
     writeFileSync(join(testDir, "voice-profile.md"), "# Voice Profile\n\nDirect and confident.");
     const profile = loadVoiceProfile(testDir);
     expect(profile).toContain("Direct and confident");
+  });
+
+  it("loads a profile from the configured relative path", () => {
+    writeFileSync(join(testDir, "custom-profile.md"), "# Voice Profile\n\nCustom tone.");
+    const profile = loadVoiceProfile(testDir, "./custom-profile.md");
+    expect(profile).toContain("Custom tone");
   });
 
   it("returns empty string when no profile", () => {

@@ -12,11 +12,34 @@ export interface EmailDraftPayload {
   body: string;
 }
 
+function normalizeRecipients(recipients: string[]): string[] {
+  const seen = new Set<string>();
+  const normalized: string[] = [];
+
+  for (const recipient of recipients) {
+    const trimmed = recipient.trim();
+    if (!trimmed) continue;
+
+    const key = trimmed.toLowerCase();
+    if (seen.has(key)) continue;
+
+    seen.add(key);
+    normalized.push(trimmed);
+  }
+
+  return normalized;
+}
+
 export function formatEmailDraftForMCP(input: EmailDraftInput): EmailDraftPayload {
+  const to = normalizeRecipients(input.to);
+  const blockedCc = new Set(to.map((recipient) => recipient.toLowerCase()));
+  const cc = normalizeRecipients(input.cc ?? [])
+    .filter((recipient) => !blockedCc.has(recipient.toLowerCase()));
+
   return {
-    to: input.to,
-    cc: input.cc ?? [],
-    subject: input.subject,
-    body: input.body,
+    to,
+    cc,
+    subject: input.subject.trim(),
+    body: input.body.trim(),
   };
 }

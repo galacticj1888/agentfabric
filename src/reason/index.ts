@@ -12,6 +12,13 @@ interface GodPromptInput {
   previousCommitments?: Commitment[];
 }
 
+function sanitizePromptField(value: string): string {
+  return value
+    .replace(/```/g, "'''")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 export function buildGodPrompt(input: GodPromptInput): string {
   const previousSection = input.previousCommitments?.length
     ? `## Previous Commitments (from last meeting)\n\n${buildPreviousRunContext(input.previousCommitments)}`
@@ -100,8 +107,14 @@ export function buildPreviousRunContext(commitments: Commitment[]): string {
   if (commitments.length === 0) return "";
   return commitments
     .map((c) => {
-      const due = c.byWhen ? ` (due: ${c.byWhen})` : "";
-      return `- ${c.who} \u2192 ${c.toWhom}: ${c.what}${due} [${c.confidence}]`;
+      const fields = [
+        `who="${sanitizePromptField(c.who)}"`,
+        `toWhom="${sanitizePromptField(c.toWhom)}"`,
+        `what="${sanitizePromptField(c.what)}"`,
+        c.byWhen ? `byWhen="${sanitizePromptField(c.byWhen)}"` : null,
+        `confidence="${c.confidence}"`,
+      ];
+      return `- ${fields.filter(Boolean).join(", ")}`;
     })
     .join("\n");
 }

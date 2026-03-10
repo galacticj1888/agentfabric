@@ -32,18 +32,19 @@ describe("mergeTranscriptText", () => {
   it("combines transcript summaries and action items", () => {
     const transcripts: FirefliesTranscript[] = [
       {
-        id: "t1", title: "FINRA Kickoff", dateString: "2026-03-07",
+        id: "t1", title: "FINRA Kickoff", dateString: "2026-03-09",
         summary: {
           short_summary: "Discussed POC scope",
           action_items: "**Jeff**\nSend pricing\n**Duane**\nGet team aligned",
         },
       },
       {
-        id: "t2", title: "FINRA Follow-up", dateString: "2026-03-09",
+        id: "t2", title: "FINRA Follow-up", dateString: "2026-03-07",
         transcript: "Full transcript text here",
       },
     ];
     const text = mergeTranscriptText(transcripts);
+    expect(text.indexOf("FINRA Follow-up")).toBeLessThan(text.indexOf("FINRA Kickoff"));
     expect(text).toContain("FINRA Kickoff");
     expect(text).toContain("Discussed POC scope");
     expect(text).toContain("Send pricing");
@@ -58,10 +59,11 @@ describe("mergeTranscriptText", () => {
 describe("mergeSlackText", () => {
   it("formats messages with channel and user", () => {
     const messages: SlackMessage[] = [
-      { text: "POC approved", ts: "123", user_name: "jeff", channel: { id: "C1", name: "ext-finra" } },
-      { text: "Great news", ts: "124", username: "ryan" },
+      { text: "POC approved", ts: "124", user_name: "jeff", channel: { id: "C1", name: "ext-finra" } },
+      { text: "Great news", ts: "123", username: "ryan" },
     ];
     const text = mergeSlackText(messages);
+    expect(text.indexOf("ryan: Great news")).toBeLessThan(text.indexOf("jeff: POC approved"));
     expect(text).toContain("[ext-finra] jeff: POC approved");
     expect(text).toContain("ryan: Great news");
   });
