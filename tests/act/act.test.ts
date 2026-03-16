@@ -351,6 +351,36 @@ describe("formatDateDivider", () => {
   });
 });
 
+describe("formatDollarAmount", () => {
+  it("formats millions with one decimal when not whole", () => {
+    expect(formatDollarAmount(1_500_000)).toBe("$1.5M");
+  });
+
+  it("formats whole millions without decimal", () => {
+    expect(formatDollarAmount(2_000_000)).toBe("$2M");
+  });
+
+  it("formats thousands", () => {
+    expect(formatDollarAmount(250_000)).toBe("$250K");
+  });
+
+  it("rounds thousands to nearest K", () => {
+    expect(formatDollarAmount(99_500)).toBe("$100K");
+  });
+
+  it("formats zero", () => {
+    expect(formatDollarAmount(0)).toBe("$0");
+  });
+
+  it("handles boundary between K and M (999,500 rounds to $1M)", () => {
+    expect(formatDollarAmount(999_500)).toBe("$1M");
+  });
+
+  it("handles boundary at exactly 999,499 (stays as K)", () => {
+    expect(formatDollarAmount(999_499)).toBe("$999K");
+  });
+});
+
 describe("formatPipelineNarrative", () => {
   it("formats the narrative as a top-level message", () => {
     const result = formatPipelineNarrative({

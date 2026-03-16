@@ -41,6 +41,11 @@ export function formatDollarAmount(amount: number): string {
     return `$${formatted}M`;
   }
   const thousands = Math.round(amount / 1000);
+  if (thousands >= 1000) {
+    const millions = thousands / 1000;
+    const formatted = millions % 1 === 0 ? millions.toFixed(0) : millions.toFixed(1);
+    return `$${formatted}M`;
+  }
   return `$${thousands}K`;
 }
 
