@@ -6,6 +6,9 @@ import {
   FabricConfigSchema,
   AccountEntrySchema,
   IngestDataSchema,
+  DealAnalysisResultSchema,
+  PipelineSectionSchema,
+  SalesThreadsRosterSchema,
 } from "../../src/types/index.js";
 
 describe("FabricOutput schema", () => {
@@ -123,5 +126,73 @@ describe("IngestData schema", () => {
     });
     expect(data.fireflies?.transcripts).toHaveLength(1);
     expect(data.slack).toBeUndefined();
+  });
+});
+
+describe("DealAnalysisResultSchema", () => {
+  it("validates a complete analysis result", () => {
+    const result = DealAnalysisResultSchema.parse({
+      dealName: "Acme Corp",
+      stage: "decisionmakerboughtin",
+      section: "closing",
+      owner: { id: "161976256", name: "Andrew Lenehan", slackTag: "<@U0AAUJEB2US>" },
+      amount: 500000,
+      closeDate: "2026-04-01",
+      currentState: "Procurement review underway. Legal redlines returned this week.",
+      weeklyDiff: "Legal redlines cleared. Security questionnaire submitted.",
+      notionEntry: "## Acme Corp\n**Stage:** Negotiation | **Amount:** $500K\n\nProcurement review underway.",
+      isStale: false,
+      daysSinceActivity: 2,
+      stuckInStage: "",
+    });
+    expect(result.dealName).toBe("Acme Corp");
+    expect(result.section).toBe("closing");
+  });
+
+  it("rejects invalid section values", () => {
+    expect(() =>
+      DealAnalysisResultSchema.parse({
+        dealName: "Test",
+        stage: "test",
+        section: "invalid",
+        owner: { id: "1", name: "Test", slackTag: "<@U1>" },
+        amount: 0,
+        closeDate: "2026-01-01",
+        currentState: "Test",
+        weeklyDiff: "Test",
+        notionEntry: "Test",
+        isStale: false,
+        daysSinceActivity: 0,
+        stuckInStage: "",
+      })
+    ).toThrow();
+  });
+});
+
+describe("PipelineSectionSchema", () => {
+  it("validates a section with deals and dollar total", () => {
+    const section = PipelineSectionSchema.parse({
+      name: "closing",
+      emoji: "🔥",
+      label: "CLOSING",
+      totalAmount: 1200000,
+      deals: [],
+    });
+    expect(section.emoji).toBe("🔥");
+    expect(section.totalAmount).toBe(1200000);
+  });
+});
+
+describe("SalesThreadsRosterSchema", () => {
+  it("validates a full roster with three sections", () => {
+    const roster = SalesThreadsRosterSchema.parse({
+      closing: { name: "closing", emoji: "🔥", label: "CLOSING", totalAmount: 0, deals: [] },
+      poc: { name: "poc", emoji: "⚙️", label: "POC", totalAmount: 0, deals: [] },
+      pipeline: { name: "pipeline", emoji: "🌱", label: "PIPELINE", totalAmount: 0, deals: [] },
+      killedDeals: [],
+      totalAmount: 0,
+      totalDeals: 0,
+    });
+    expect(roster.closing.emoji).toBe("🔥");
   });
 });

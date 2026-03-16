@@ -86,3 +86,47 @@ export const AccountEntrySchema = z.object({
   contacts: z.array(z.string()).default([]),
 });
 export type AccountEntry = z.infer<typeof AccountEntrySchema>;
+
+// --- Sales Threads Pipeline Types ---
+
+export const DealOwnerSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  slackTag: z.string(),
+});
+export type DealOwner = z.infer<typeof DealOwnerSchema>;
+
+export const DealAnalysisResultSchema = z.object({
+  dealName: z.string(),
+  stage: z.string(),
+  section: z.enum(["closing", "poc", "pipeline"]),
+  owner: DealOwnerSchema,
+  amount: z.number(),
+  closeDate: z.string(),
+  currentState: z.string(),
+  weeklyDiff: z.string(),
+  notionEntry: z.string(),
+  isStale: z.boolean(),
+  daysSinceActivity: z.number(),
+  stuckInStage: z.string(),
+});
+export type DealAnalysisResult = z.infer<typeof DealAnalysisResultSchema>;
+
+export const PipelineSectionSchema = z.object({
+  name: z.enum(["closing", "poc", "pipeline"]),
+  emoji: z.string(),
+  label: z.string(),
+  totalAmount: z.number(),
+  deals: z.array(DealAnalysisResultSchema),
+});
+export type PipelineSection = z.infer<typeof PipelineSectionSchema>;
+
+export const SalesThreadsRosterSchema = z.object({
+  closing: PipelineSectionSchema,
+  poc: PipelineSectionSchema,
+  pipeline: PipelineSectionSchema,
+  killedDeals: z.array(z.string()),
+  totalAmount: z.number(),
+  totalDeals: z.number(),
+});
+export type SalesThreadsRoster = z.infer<typeof SalesThreadsRosterSchema>;
