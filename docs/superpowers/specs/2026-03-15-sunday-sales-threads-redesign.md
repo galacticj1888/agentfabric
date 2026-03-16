@@ -12,6 +12,7 @@ Redesign of the weekly Sunday sales threads process. Replaces the flat alphabeti
 - **Slack account channels:** ext-{company}-runlayer channels per accounts.yaml
 - **Gmail:** Recent email threads per account domain
 - **Fireflies:** Meeting transcripts from the past week
+- **Granola:** Meeting notes (query via `mcp__claude_ai_RL_GRANOLA__query_granola_meetings`)
 - **Calendar:** Meeting history (optional — graceful degradation if unavailable; Fireflies covers meeting detection)
 - **Target channel:** `#sales-threads` (`C0AHTTDT4SG`)
 - **DM target for all reports:** Jeff Settle (`U0A6PE41XK9`)
@@ -86,6 +87,7 @@ For each active deal, spawn a parallel analysis agent. Each agent gathers max co
 4. **HubSpot deal data** — current stage, amount, close date, owner. Stage change detection: compare current HubSpot stage against last week's stage as recorded in the previous Slack thread (the section header it appeared under indicates prior stage). Also query `hs_date_entered_{stage}` properties if available to determine how long a deal has been in its current stage.
 5. **Gmail threads** — recent email activity with the account domain
 6. **Fireflies transcripts** — any meetings in the last week
+7. **Granola meeting notes** — any meeting notes from the last week
 
 **Weekly diff synthesis:** From all context, produce:
 
