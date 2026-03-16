@@ -4,6 +4,13 @@ import {
   formatLinearTasksForMCP,
   formatSalesThreadForMCP,
   formatCustomerSummaryForReview,
+  formatSectionHeader,
+  formatThreadHeader,
+  formatStateDiffReply,
+  formatOwnerPromptReply,
+  formatDateDivider,
+  formatPipelineNarrative,
+  formatDollarAmount,
 } from "../../src/act/index.js";
 
 describe("formatEmailDraftForMCP", () => {
@@ -237,5 +244,151 @@ describe("formatCustomerSummaryForReview", () => {
     });
     expect(result.text).not.toContain("\u2014");
     expect(result.text).toContain(" - ");
+  });
+});
+
+describe("formatSectionHeader", () => {
+  it("formats a section header with emoji and dollar total", () => {
+    const result = formatSectionHeader({
+      channel: "C0AHTTDT4SG",
+      emoji: "\u{1F525}",
+      label: "CLOSING",
+      totalAmount: 1200000,
+    });
+    expect(result.channel).toBe("C0AHTTDT4SG");
+    expect(result.text).toBe("\u{1F525} CLOSING \u2014 $1.2M");
+  });
+
+  it("formats amounts under 1M with K suffix", () => {
+    const result = formatSectionHeader({
+      channel: "C0AHTTDT4SG",
+      emoji: "\u{1F331}",
+      label: "PIPELINE",
+      totalAmount: 400000,
+    });
+    expect(result.text).toBe("\u{1F331} PIPELINE \u2014 $400K");
+  });
+
+  it("formats zero dollar amounts", () => {
+    const result = formatSectionHeader({
+      channel: "C0AHTTDT4SG",
+      emoji: "\u2699\uFE0F",
+      label: "POC",
+      totalAmount: 0,
+    });
+    expect(result.text).toBe("\u2699\uFE0F POC \u2014 $0");
+  });
+});
+
+describe("formatThreadHeader", () => {
+  it("formats deal name as bold lowercase", () => {
+    const result = formatThreadHeader({
+      channel: "C0AHTTDT4SG",
+      dealName: "Acme Corp",
+    });
+    expect(result.text).toBe("*acme corp*");
+    expect(result.channel).toBe("C0AHTTDT4SG");
+  });
+
+  it("preserves hyphens and suffixes in deal names", () => {
+    const result = formatThreadHeader({
+      channel: "C0AHTTDT4SG",
+      dealName: "Klaviyo - Expansion",
+    });
+    expect(result.text).toBe("*klaviyo - expansion*");
+  });
+});
+
+describe("formatStateDiffReply", () => {
+  it("formats state and weekly diff as a threaded reply", () => {
+    const result = formatStateDiffReply({
+      channel: "C0AHTTDT4SG",
+      thread_ts: "1741500000.000000",
+      currentState: "Acme is a $500K negotiation-stage deal.",
+      weeklyDiff: "Legal redlines cleared this week.",
+    });
+    expect(result.thread_ts).toBe("1741500000.000000");
+    expect(result.text).toContain("$500K negotiation-stage deal");
+    expect(result.text).toContain("Legal redlines cleared");
+  });
+
+  it("sanitizes unicode in state and diff text", () => {
+    const result = formatStateDiffReply({
+      channel: "C0AHTTDT4SG",
+      thread_ts: "1741500000.000000",
+      currentState: "Deal is progressing \u2014 procurement started",
+      weeklyDiff: "Stage moved from \u201cQualified\u201d to POC",
+    });
+    expect(result.text).not.toContain("\u2014");
+    expect(result.text).not.toContain("\u201c");
+  });
+});
+
+describe("formatOwnerPromptReply", () => {
+  it("formats the owner accountability prompt as a threaded reply", () => {
+    const result = formatOwnerPromptReply({
+      channel: "C0AHTTDT4SG",
+      thread_ts: "1741500000.000000",
+      ownerSlackTag: "<@U0AAUJEB2US>",
+      dealName: "Acme Corp",
+    });
+    expect(result.thread_ts).toBe("1741500000.000000");
+    expect(result.text).toContain("<@U0AAUJEB2US>");
+    expect(result.text).toContain("\u2014");
+    expect(result.text).toContain("Acme Corp");
+    expect(result.text).toContain("accomplish");
+    expect(result.text).toContain("stretch goal");
+  });
+});
+
+describe("formatDateDivider", () => {
+  it("formats a date divider with em dashes", () => {
+    const result = formatDateDivider({
+      channel: "C0AHTTDT4SG",
+      date: "03/15/2026",
+    });
+    expect(result.text).toBe("\u2014\u2014\u2014\u2014 03/15/2026 \u2014\u2014\u2014\u2014");
+  });
+});
+
+describe("formatDollarAmount", () => {
+  it("formats millions with one decimal when not whole", () => {
+    expect(formatDollarAmount(1_500_000)).toBe("$1.5M");
+  });
+
+  it("formats whole millions without decimal", () => {
+    expect(formatDollarAmount(2_000_000)).toBe("$2M");
+  });
+
+  it("formats thousands", () => {
+    expect(formatDollarAmount(250_000)).toBe("$250K");
+  });
+
+  it("rounds thousands to nearest K", () => {
+    expect(formatDollarAmount(99_500)).toBe("$100K");
+  });
+
+  it("formats zero", () => {
+    expect(formatDollarAmount(0)).toBe("$0");
+  });
+
+  it("handles boundary between K and M (999,500 rounds to $1M)", () => {
+    expect(formatDollarAmount(999_500)).toBe("$1M");
+  });
+
+  it("handles boundary at exactly 999,499 (stays as K)", () => {
+    expect(formatDollarAmount(999_499)).toBe("$999K");
+  });
+});
+
+describe("formatPipelineNarrative", () => {
+  it("formats the narrative as a top-level message", () => {
+    const result = formatPipelineNarrative({
+      channel: "C0AHTTDT4SG",
+      narrative: "Pipeline sits at $2.4M across 34 active deals.",
+    });
+    expect(result.channel).toBe("C0AHTTDT4SG");
+    expect(result.text).toContain("$2.4M");
+    expect(result.thread_ts).toBeUndefined();
   });
 });

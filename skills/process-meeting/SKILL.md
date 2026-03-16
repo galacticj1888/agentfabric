@@ -163,6 +163,8 @@ mcp__claude_ai_RL_Slack__send_message
   text: [from god prompt response]
 ```
 
+> **Note:** The Sunday sales threads process now creates thread headers with two initial replies (state+diff and owner prompt). Your meeting update reply will appear after those. No change needed to search/reply logic.
+
 If NO existing thread is found (new account, or Sunday thread hasn't been created yet), post a new top-level message instead:
 ```
 mcp__claude_ai_RL_Slack__send_message
