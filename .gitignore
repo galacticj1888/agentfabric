@@ -5,3 +5,4 @@ dist/
 .env.*
 output/
 .DS_Store
+.worktrees/
